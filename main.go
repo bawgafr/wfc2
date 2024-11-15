@@ -12,7 +12,7 @@ var embededStatic embed.FS
 
 func main() {
 
-	g := game.NewGame(embededStatic)
+	g := game.NewGame(embededStatic, 42)
 
 	ebiten.SetWindowSize(720, 720)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)

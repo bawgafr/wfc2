@@ -13,9 +13,11 @@ import (
 
 type Connector int
 
+const connectorCount = 2
+
 const (
-	Grass Connector = iota
-	Road  Connector = iota
+	Grass Connector = 1
+	Road  Connector = 2
 )
 
 type Tile struct {
