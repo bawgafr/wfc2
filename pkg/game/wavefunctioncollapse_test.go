@@ -28,12 +28,15 @@ func Test_getInitialBuildBoard(t *testing.T) {
 		}
 	})
 
+	// test the build board without any seed tiles
 	t.Run("test initial build board", func(t *testing.T) {
-		got := getInitialBuildBoard(3, 3)
+		g := getTestGame()
+		g.Rules.SeedTiles = []SeedTiles{}
+		got := getInitialBuildBoard(g)
 
-		want := make([][]buildCell, 3)
+		want := make([][]buildCell, g.Rules.BoardWidth)
 		for i := range want {
-			want[i] = make([]buildCell, 3)
+			want[i] = make([]buildCell, g.Rules.BoardHeight)
 			for j := range want[i] {
 				want[i][j] = initialBuildCell
 			}
@@ -65,25 +68,66 @@ func Test_getInitialBuildBoard(t *testing.T) {
 
 	})
 
-	t.Run("test initial entropy board", func(t *testing.T) {
+	// test the build board without any seed tiles
+	t.Run("test initial build board with centre cross seed", func(t *testing.T) {
+		g := getTestGame()
+		got := getInitialBuildBoard(g)
+
+		want := make([][]buildCell, g.Rules.BoardWidth)
+		for i := range want {
+			want[i] = make([]buildCell, g.Rules.BoardHeight)
+			for j := range want[i] {
+				want[i][j] = initialBuildCell
+			}
+		}
+		want[1][1] = buildCell{placed: true, connectors: []Connector{Road, Road, Road, Road}}
+
+		if len(want) != len(got) {
+			t.Errorf("initial board not what in correct state size-wise got %v, want %v", got, want)
+		}
+
+		// deepequals and slices.equal have failed me...
+		for i, wantrow := range want {
+			gotrow := got[i]
+			if len(wantrow) != len(gotrow) {
+				t.Errorf("initial board not what in correct state row size-wise got %v, want %v", gotrow, wantrow)
+			}
+
+			for j, wantcell := range wantrow {
+				gotcell := gotrow[j]
+				for k, wantConnector := range wantcell.connectors {
+					gotConnector := gotcell.connectors[k]
+
+					if wantConnector != gotConnector {
+						t.Errorf("initial board not what in correct state got %v, want %v", gotcell, wantcell)
+					}
+				}
+
+			}
+		}
+
+	})
+
+	t.Run("test blank entropy board", func(t *testing.T) {
 
 		// test in the initial state, and all cards should be possible
 
-		cards := getTestCards()
+		g := getTestGame()
+		g.Rules.SeedTiles = []SeedTiles{}
 
-		want := make([][][]int, 3)
+		want := make([][][]int, g.Rules.BoardWidth)
 		for i := range want {
-			want[i] = make([][]int, 3)
+			want[i] = make([][]int, g.Rules.BoardHeight)
 			for j := range want[i] {
 				want[i][j] = make([]int, 0)
 
-				for _, card := range cards {
+				for _, card := range g.Cards {
 					want[i][j] = append(want[i][j], card.Id)
 				}
 			}
 		}
 
-		got := getEntropyBoard(getInitialBuildBoard(3, 3), cards)
+		got := getEntropyBoard(getInitialBuildBoard(g), g)
 
 		for i, wantRow := range want {
 			gotRow := got[i]
@@ -115,11 +159,11 @@ func Test_getInitialBuildBoard(t *testing.T) {
 				{1, 2, 3, 4}, {2, 3, 4}, {1, 2, 3, 4},
 			},
 		}
-		buildBoard := getInitialBuildBoard(3, 3)
+		buildBoard := getInitialBuildBoard(getTestGame())
 		buildBoard[1][1] = buildCell{placed: true, connectors: []Connector{Road, Road, Road, Road}}
 
-		got := getEntropyBoard(buildBoard, getTestCards())
-
+		got := getEntropyBoard(buildBoard, getTestGame())
+		getTestCards()
 		compareEntropyBoard(t, got, want)
 
 	})
@@ -130,7 +174,7 @@ func Test_getEntropicCard(t *testing.T) {
 
 	// note i goes down, j goes across
 
-	board := getTestBoardWithCrossInMiddle()
+	board := getInitialBuildBoard(getTestGame())
 
 	t.Run("test that the entropic card is built correctly corner cards ", func(t *testing.T) {
 
@@ -182,10 +226,12 @@ func Test_countEntropyBoard(t *testing.T) {
 		{x: 1, y: 0, ids: []int{2}},
 		{x: 2, y: 1, ids: []int{2}},
 	}
+	g := getTestGame()
 
-	got := countEntropyBoard(getEntropyBoard(getTestBoardWithCrossInMiddle(), getTestCards()))
+	got := countEntropyBoard(getEntropyBoard(getInitialBuildBoard(g), g))
 
 	if len(want) != len(got) {
+
 		t.Errorf("different number of low-entropy cards returned, got %v, want %v", got, want)
 	}
 
@@ -207,9 +253,90 @@ func Test_evolveBoard(t *testing.T) {
 	// we're going to use a fake random number generator to ensure that the same cards are picked
 	// it will always return 0 so the first available and the first id from that available will be picked
 
+	g := getTestGame()
+
+	initalBuildBoard := getInitialBuildBoard(g)
+
+	want := [][]buildCell{
+		{newBuildCell(false, 3, 3, 3, 3), newBuildCell(true, 2, 2, 2, 2), newBuildCell(false, 3, 3, 3, 3)},
+		{newBuildCell(false, 3, 3, 3, 3), newBuildCell(true, 2, 2, 2, 2), newBuildCell(false, 3, 3, 3, 3)},
+		{newBuildCell(false, 3, 3, 3, 3), newBuildCell(false, 3, 3, 3, 3), newBuildCell(false, 3, 3, 3, 3)},
+	}
+
+	g.evolveBoard(&initalBuildBoard)
+
+	for i, wantRow := range want {
+		gotRow := initalBuildBoard[i]
+		for j, wantCell := range wantRow {
+			gotCell := gotRow[j]
+			for k, wantConnector := range wantCell.connectors {
+				gotConnector := gotCell.connectors[k]
+
+				if wantConnector != gotConnector {
+					t.Errorf("evolved board not what in correct state got %v, want %v", gotCell, wantCell)
+				}
+			}
+		}
+
+	}
+
+}
+
+func Test_processEnds(t *testing.T) {
+	t.Run("test that the process ends after 8 iterations with Cross in centre", func(t *testing.T) {
+		g := getTestGame()
+
+		buildBoard := getInitialBuildBoard(g)
+
+		cnt := 0
+		for {
+			println("cnt", cnt)
+			printBoard(g.Board)
+			if !g.evolveBoard(&buildBoard) {
+				break
+			}
+			cnt++
+			println("\n\n")
+		}
+
+		if cnt != 8 {
+			fmt.Printf("%v", buildBoard)
+			t.Errorf("process ends did not end after 8 iterations, got %v", cnt)
+		}
+
+	})
+
+	t.Run("test that the process ends after 8 iterations with L in centre", func(t *testing.T) {
+		g := getTestGame()
+		g.Rules.SeedTiles = []SeedTiles{{1, 1, 3}}
+		buildBoard := getInitialBuildBoard(g)
+
+		cnt := 0
+		for {
+			println("cnt", cnt)
+			printBoard(g.Board)
+			if !g.evolveBoard(&buildBoard) {
+				break
+			}
+			cnt++
+			println("\n\n")
+		}
+
+		if cnt != 8 {
+			fmt.Printf("%v", buildBoard)
+			t.Errorf("process ends did not end after 8 iterations, got %v", cnt)
+		}
+	})
+
+}
+
+// ======================== helper functions ========================
+
+func getTestGame() *Game {
 	rules := BasicRules{
 		BoardWidth:  3,
 		BoardHeight: 3,
+		SeedTiles:   []SeedTiles{{1, 1, 2}},
 	}
 	tiles := make([][]Tile, rules.BoardWidth)
 	rows := make([]Tile, rules.BoardHeight*rules.BoardWidth)
@@ -220,41 +347,23 @@ func Test_evolveBoard(t *testing.T) {
 
 	tiles[1][1] = Tile{X: 1, Y: 1, Card: Card{Id: 2, Connectors: []Connector{Road, Road, Road, Road}}}
 
-	g := Game{
+	return &Game{
 		Cards: getTestCards(),
 		Rules: rules,
 		Board: tiles,
 		R:     &TestRnd{},
 	}
-
-	initalBuildBoard := getTestBoardWithCrossInMiddle()
-
-	fmt.Println("BB before: ", initalBuildBoard)
-	fmt.Println("Board before: ", g.Board)
-	evolveBoard(g.R, &initalBuildBoard, getTestCards(), &g.Board)
-	fmt.Println("BB after: ", initalBuildBoard)
-	fmt.Println("Board after: ", g.Board)
-	t.Fail()
 }
 
-// ======================== helper functions ========================
+func newBuildCell(placed bool, a, b, c, d Connector) buildCell {
+	return buildCell{placed: placed, connectors: []Connector{a, b, c, d}}
+}
 
 type TestRnd struct {
 }
 
 func (t TestRnd) Intn(n int) int {
 	return 0
-}
-
-func printEntropyBoard(title string, entropyBoard [][][]int) {
-	fmt.Println(title)
-	for _, row := range entropyBoard {
-		for _, cell := range row {
-			fmt.Print(cell)
-		}
-		fmt.Println("")
-	}
-
 }
 
 func compareEntropyBoard(t *testing.T, got, want [][][]int) {
@@ -267,8 +376,8 @@ func compareEntropyBoard(t *testing.T, got, want [][][]int) {
 				gotEntropy := gotCell[k]
 
 				if wantEntropy != gotEntropy {
-					printEntropyBoard("got", got)
-					printEntropyBoard("want", want)
+					debugPrintEntropyBoard("got", got)
+					debugPrintEntropyBoard("want", want)
 					t.Errorf("initial entropy board not what in correct state got %v, want %v", gotCell, wantCell)
 				}
 			}
@@ -293,11 +402,11 @@ func compareConnectors(t *testing.T, got, want []Connector) {
 
 }
 
-func getTestBoardWithCrossInMiddle() [][]buildCell {
-	board := getInitialBuildBoard(3, 3)
-	board[1][1] = buildCell{placed: true, connectors: []Connector{Road, Road, Road, Road}}
-	return board
-}
+// func getTestBoardWithCrossInMiddle() [][]buildCell {
+// 	board := getInitialBuildBoard(getTestGame())
+// 	board[1][1] = buildCell{placed: true, connectors: []Connector{Road, Road, Road, Road}}
+// 	return board
+// }
 
 func getTestCards() []Card {
 	// get a set of cards with connectors and ids that can be used for testing
@@ -308,4 +417,29 @@ func getTestCards() []Card {
 
 	return []Card{allGrass, crossRoads, lRoad, deadEnd}
 
+}
+
+func PrintBuildBoard(buildBoard [][]buildCell) {
+
+	for _, row := range buildBoard {
+
+		for _, cell := range row {
+			if cell.placed {
+				print("X")
+			} else {
+				print("O")
+			}
+		}
+		println()
+	}
+
+}
+
+func printBoard(board [][]Tile) {
+	for _, row := range board {
+		for _, tile := range row {
+			print(tile.Card.Id)
+		}
+		println()
+	}
 }

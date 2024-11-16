@@ -1,5 +1,7 @@
 package game
 
+import "fmt"
+
 const fullConnector = Grass + Road
 
 var initialBuildCell = buildCell{placed: false, connectors: []Connector{Grass + Road, Grass + Road, Grass + Road, Grass + Road}}
@@ -15,20 +17,28 @@ type available struct {
 	ids []int
 }
 
-func getInitialBuildBoard(width, height int) [][]buildCell {
-	board := make([][]buildCell, width)
+// returns a board of buildCells with the initial buildCell
+func getInitialBuildBoard(g *Game) [][]buildCell {
+	board := make([][]buildCell, g.Rules.BoardWidth)
 	for i := range board {
-		board[i] = make([]buildCell, height)
+		board[i] = make([]buildCell, g.Rules.BoardHeight)
 		for j := range board[i] {
 			board[i][j] = initialBuildCell
 		}
 	}
+
+	// add in the seed tiles
+	for _, seedTile := range g.Rules.SeedTiles {
+
+		board[seedTile.X][seedTile.Y] = buildCell{placed: true, connectors: g.Cards[seedTile.Id-1].Connectors}
+	}
+
 	return board
 }
 
 // loop through all of the buildCells in the board and set the entropy to the number of possible connectors
 // we need to test the card's connectors against the the surrounding cells connectors
-func getEntropyBoard(board [][]buildCell, cards []Card) [][][]int {
+func getEntropyBoard(board [][]buildCell, g *Game) [][][]int {
 
 	entropyBoard := make([][][]int, len(board))
 
@@ -42,7 +52,7 @@ func getEntropyBoard(board [][]buildCell, cards []Card) [][][]int {
 
 			if !placed {
 				// compare the built cell to all of the cards
-				for _, card := range cards {
+				for _, card := range g.Cards {
 					match := true
 					for k := 0; k < 4; k++ {
 						if (buildCell.connectors[k] & card.Connectors[k]) == 0 {
@@ -103,21 +113,41 @@ func countEntropyBoard(entropyBoard [][][]int) []available {
 	return availableCells
 }
 
-func evolveBoard(r Rnd, buildBoard *[][]buildCell, cards []Card, board *[][]Tile) {
+func (g *Game) evolveBoard(buildBoard *[][]buildCell) bool {
 
 	// the whole loop
 
-	entropyBoard := getEntropyBoard(*buildBoard, cards)
+	entropyBoard := getEntropyBoard(*buildBoard, g)
 	availableCards := countEntropyBoard(entropyBoard)
 
+	debugPrintEntropyBoard("entropy board", entropyBoard)
+	fmt.Println("available cards", availableCards)
+
+	if len(availableCards) == 0 {
+		return false
+	}
+
 	// select a random available
-	selectedAvaialable := availableCards[r.Intn(len(availableCards))]
+	selectedAvaialable := availableCards[g.R.Intn(len(availableCards))]
 
 	// select a random id from the available
-	selectedCardId := selectedAvaialable.ids[r.Intn(len(selectedAvaialable.ids))]
+	selectedCardId := selectedAvaialable.ids[g.R.Intn(len(selectedAvaialable.ids))] - 1 // the card ids go from 1 so need to take one off to get the correct card
 	// place the card in the buildBoard
-	(*buildBoard)[selectedAvaialable.x][selectedAvaialable.y] = buildCell{placed: true, connectors: cards[selectedCardId].Connectors}
+	(*buildBoard)[selectedAvaialable.x][selectedAvaialable.y] = buildCell{placed: true, connectors: g.Cards[selectedCardId].Connectors}
 
 	// place the card on the board
-	(*board)[selectedAvaialable.x][selectedAvaialable.y] = Tile{Card: cards[selectedCardId], X: selectedAvaialable.x, Y: selectedAvaialable.y}
+	g.Board[selectedAvaialable.x][selectedAvaialable.y] = Tile{Card: g.Cards[selectedCardId], X: selectedAvaialable.x, Y: selectedAvaialable.y}
+
+	return true
+}
+
+func debugPrintEntropyBoard(title string, entropyBoard [][][]int) {
+	fmt.Println(title)
+	for _, row := range entropyBoard {
+		for _, cell := range row {
+			fmt.Print(cell)
+		}
+		fmt.Println("")
+	}
+
 }

@@ -13,7 +13,7 @@ import (
 
 type Connector int
 
-const connectorCount = 2
+const ConnectorCount = 2
 
 const (
 	Grass Connector = 1
@@ -131,10 +131,19 @@ func rotateCard(card Card, rotation, id int) Card {
 func rotateConnections(connectors []Connector, rotation int) []Connector {
 	rotated := make([]Connector, len(connectors))
 	rot := rotation / 90
-	fmt.Println("rot:", rot)
 	for i, c := range connectors {
 		rotated[(i+rot)%len(connectors)] = c
 	}
 	return rotated
 
+}
+
+func NewBoard(rules BasicRules) [][]Tile {
+	tiles := make([][]Tile, rules.BoardWidth)
+	rows := make([]Tile, rules.BoardHeight*rules.BoardWidth)
+	for i, startRow := 0, 0; i < rules.BoardWidth; i, startRow = i+1, startRow+rules.BoardHeight {
+		endRow := startRow + rules.BoardHeight
+		tiles[i] = rows[startRow:endRow:endRow]
+	}
+	return tiles
 }

@@ -31,7 +31,7 @@ To build the board, we can have a Board made of [][]Tiles
 and in addition to the we'll have a BuildBoard with [][]BuildCell 
 
 Build Cell can have {connectors   []Connector} and the connector for each quadrant can be a sum of all of the possible connectors. In the current case just grass and roads, so we start with connectors [3,3,3,3]
-Build loop:
+Build loop: {
 	calc entropy-board [][][]int ---- [x][y][index of possible cards]
 	
 	loop through the entropy-board and find the x/ys with the lowest number of possible ids.
@@ -42,5 +42,7 @@ Build loop:
 
 	update the build board and the board
 }
+
+How do we know its finished...
 
 	
