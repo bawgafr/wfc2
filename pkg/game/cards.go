@@ -9,6 +9,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"golang.org/x/exp/rand"
 )
 
 type Connector int
@@ -19,6 +20,16 @@ const (
 	Grass Connector = 1
 	Road  Connector = 2
 )
+
+func (c Connector) String() string {
+	switch c {
+	case Grass:
+		return "Grass"
+	case Road:
+		return "Road"
+	}
+	return fmt.Sprintf("%d", c)
+}
 
 type Tile struct {
 	Card Card
@@ -34,10 +45,19 @@ type Image struct {
 	rotateAngle float64
 }
 
+func (i Image) String() string {
+	return fmt.Sprintf("Img rot: %f", i.rotateAngle)
+}
+
 type Card struct {
 	Id         int
 	Image      Image
 	Connectors []Connector
+}
+
+func (c Card) String() string {
+	str := fmt.Sprintf("{Id: %d, Image: Image{nil, %f}, Connectors: []Connector{%s, %s, %s, %s}},\n", c.Id, c.Image.rotateAngle, c.Connectors[0], c.Connectors[1], c.Connectors[2], c.Connectors[3])
+	return str
 }
 
 type BaseCards struct {
@@ -52,11 +72,15 @@ func BuildCards(rules BasicRules, fs fs.FS) []Card {
 	cards := make([]Card, 0)
 
 	id := 1
+	var img *ebiten.Image
+	var err error
 	for _, baseCard := range rules.BaseCards {
-		img, _, err := ebitenutil.NewImageFromFileSystem(fs, baseCard.Filename)
-		if err != nil {
-			fmt.Printf("error reading image file %s: %v", baseCard.Filename, err)
-			panic(err)
+		if baseCard.Filename != "" {
+			img, _, err = ebitenutil.NewImageFromFileSystem(fs, baseCard.Filename)
+			if err != nil {
+				fmt.Printf("error reading image file %s: %v", baseCard.Filename, err)
+				panic(err)
+			}
 		}
 		image := Image{
 			img: img,
@@ -138,12 +162,28 @@ func rotateConnections(connectors []Connector, rotation int) []Connector {
 
 }
 
-func NewBoard(rules BasicRules) [][]Tile {
+func NewBoard(rules BasicRules, cards []Card) [][]Tile {
 	tiles := make([][]Tile, rules.BoardWidth)
 	rows := make([]Tile, rules.BoardHeight*rules.BoardWidth)
 	for i, startRow := 0, 0; i < rules.BoardWidth; i, startRow = i+1, startRow+rules.BoardHeight {
 		endRow := startRow + rules.BoardHeight
 		tiles[i] = rows[startRow:endRow:endRow]
 	}
+
+	// add in the seed tiles
+	for _, seedTile := range rules.SeedTiles {
+		tiles[seedTile.X][seedTile.Y] = Tile{
+			X:    seedTile.X,
+			Y:    seedTile.Y,
+			Card: cards[seedTile.Id-1],
+		}
+	}
+
 	return tiles
+}
+
+func NewBasicRandom(seed uint64) Rnd {
+
+	s := rand.NewSource(seed)
+	return rand.New(s)
 }

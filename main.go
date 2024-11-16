@@ -14,6 +14,8 @@ func main() {
 
 	g := game.NewGame(embededStatic, 42)
 
+	g.CreateLandscape()
+
 	ebiten.SetWindowSize(720, 720)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowTitle("Wave function collapse 2")

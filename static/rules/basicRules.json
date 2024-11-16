@@ -9,8 +9,8 @@
         {"filename":"static/images/corner.png", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270]},
         {"filename":"static/images/end.png", "imageLocation":[0,0,32,32], "connectors":"GGGR", "rotations": [90, 180, 270]}
     ],
-    "tileSeeds": [
-        {"x": 0, "y": 0, "id":0}
+    "seedTiles": [
+        {"x": 2, "y": 3, "id":19}
     ]
 
 }

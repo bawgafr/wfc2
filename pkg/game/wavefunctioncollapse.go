@@ -120,8 +120,8 @@ func (g *Game) evolveBoard(buildBoard *[][]buildCell) bool {
 	entropyBoard := getEntropyBoard(*buildBoard, g)
 	availableCards := countEntropyBoard(entropyBoard)
 
-	debugPrintEntropyBoard("entropy board", entropyBoard)
-	fmt.Println("available cards", availableCards)
+	// debugPrintEntropyBoard("entropy board", entropyBoard)
+	// fmt.Println("available cards", availableCards)
 
 	if len(availableCards) == 0 {
 		return false

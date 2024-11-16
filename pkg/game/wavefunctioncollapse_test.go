@@ -99,7 +99,7 @@ func Test_getInitialBuildBoard(t *testing.T) {
 					gotConnector := gotcell.connectors[k]
 
 					if wantConnector != gotConnector {
-						t.Errorf("initial board not what in correct state got %v, want %v", gotcell, wantcell)
+						t.Errorf("initial board not what in correct state got %v, want %v (%d, %d, %d)", gotcell, wantcell, i, j, k)
 					}
 				}
 
