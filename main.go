@@ -13,7 +13,7 @@ var embededStatic embed.FS
 func main() {
 
 	g := game.NewGame(embededStatic, 42)
-
+	// g.Start()
 	g.CreateLandscape()
 
 	ebiten.SetWindowSize(720, 720)

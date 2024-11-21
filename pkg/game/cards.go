@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/json"
 	"fmt"
+	_ "image/png"
 	"io/fs"
 	"math"
 	"wfc2/pkg/boiler"
@@ -32,7 +33,7 @@ func (c Connector) String() string {
 }
 
 type Tile struct {
-	Card Card
+	Card *Card
 	X    int
 	Y    int
 }
@@ -51,7 +52,7 @@ func (i Image) String() string {
 
 type Card struct {
 	Id         int
-	Image      Image
+	Image      *Image
 	Connectors []Connector
 }
 
@@ -67,9 +68,9 @@ type BaseCards struct {
 	Rotations     []int
 }
 
-func BuildCards(rules BasicRules, fs fs.FS) []Card {
+func BuildCards(rules BasicRules, fs fs.FS) map[int]*Card {
 
-	cards := make([]Card, 0)
+	cards := make(map[int]*Card)
 
 	id := 1
 	var img *ebiten.Image
@@ -87,16 +88,16 @@ func BuildCards(rules BasicRules, fs fs.FS) []Card {
 		}
 		card := Card{
 			Id:         id,
-			Image:      image,
+			Image:      &image,
 			Connectors: convertConnections(baseCard.Connectors),
 		}
-		cards = append(cards, card)
+		cards[card.Id] = &card
 		id++
 		for _, rotation := range baseCard.Rotations {
 			rotCard := rotateCard(card, rotation, id)
-			cards = append(cards, rotCard)
+			cards[rotCard.Id] = &rotCard
 			id++
-			cards = append(cards, card)
+			cards[card.Id] = &card
 		}
 	}
 
@@ -139,7 +140,7 @@ func LoadRules(filename string, fs fs.FS) BasicRules {
 func rotateCard(card Card, rotation, id int) Card {
 
 	rad := float64(rotation) * math.Pi / 180.00
-	rotImage := Image{
+	rotImage := &Image{
 		img:         card.Image.img,
 		rotateAngle: rad,
 	}
@@ -162,7 +163,7 @@ func rotateConnections(connectors []Connector, rotation int) []Connector {
 
 }
 
-func NewBoard(rules BasicRules, cards []Card) [][]Tile {
+func NewBoard(rules BasicRules, cards map[int]*Card) [][]Tile {
 	tiles := make([][]Tile, rules.BoardWidth)
 	rows := make([]Tile, rules.BoardHeight*rules.BoardWidth)
 	for i, startRow := 0, 0; i < rules.BoardWidth; i, startRow = i+1, startRow+rules.BoardHeight {
@@ -172,10 +173,12 @@ func NewBoard(rules BasicRules, cards []Card) [][]Tile {
 
 	// add in the seed tiles
 	for _, seedTile := range rules.SeedTiles {
+
+		card := cards[seedTile.Id]
 		tiles[seedTile.X][seedTile.Y] = Tile{
 			X:    seedTile.X,
 			Y:    seedTile.Y,
-			Card: cards[seedTile.Id-1],
+			Card: card,
 		}
 	}
 
@@ -186,4 +189,17 @@ func NewBasicRandom(seed uint64) Rnd {
 
 	s := rand.NewSource(seed)
 	return rand.New(s)
+}
+
+func (t Tile) Draw(screen *ebiten.Image) {
+	if t.Card != nil {
+		op := &ebiten.DrawImageOptions{}
+		xPos := (t.Y * 32) + 48
+		yPos := (t.X * 32) + 48
+		op.GeoM.Translate(-16.0, -16.0)
+		op.GeoM.Rotate(t.Card.Image.rotateAngle)
+		op.GeoM.Translate(float64(xPos), float64(yPos))
+		screen.DrawImage(t.Card.Image.img, op)
+	}
+
 }

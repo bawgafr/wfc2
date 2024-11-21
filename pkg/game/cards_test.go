@@ -121,33 +121,27 @@ func Test_BuildCards(t *testing.T) {
 
 	got := BuildCards(rules, fs)
 
-	want := []Card{
-		{Id: 1, Image: Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Grass}},
-		{Id: 2, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Grass, Road, Grass}},
-		{Id: 3, Image: Image{nil, 1.5707963267948966}, Connectors: []Connector{Grass, Road, Grass, Road}},
-		{Id: 2, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Grass, Road, Grass}},
-		{Id: 4, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Road, Road}},
-		{Id: 5, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Grass, Grass}},
-		{Id: 6, Image: Image{nil, 1.5707963267948966}, Connectors: []Connector{Grass, Road, Road, Grass}},
-		{Id: 5, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Grass, Grass}},
-		{Id: 7, Image: Image{nil, 3.141592653589793}, Connectors: []Connector{Grass, Grass, Road, Road}},
-		{Id: 5, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Grass, Grass}},
-		{Id: 8, Image: Image{nil, 4.71238898038469}, Connectors: []Connector{Road, Grass, Grass, Road}},
-		{Id: 5, Image: Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Grass, Grass}},
-		{Id: 9, Image: Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Road}},
-		{Id: 10, Image: Image{nil, 1.5707963267948966}, Connectors: []Connector{Road, Grass, Grass, Grass}},
-		{Id: 9, Image: Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Road}},
-		{Id: 11, Image: Image{nil, 3.141592653589793}, Connectors: []Connector{Grass, Road, Grass, Grass}},
-		{Id: 9, Image: Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Road}},
-		{Id: 12, Image: Image{nil, 4.71238898038469}, Connectors: []Connector{Grass, Grass, Road, Grass}},
-		{Id: 9, Image: Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Road}},
-	}
+	want := make(map[int]*Card)
+
+	want[1] = &Card{Id: 1, Image: &Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Grass}}
+	want[2] = &Card{Id: 2, Image: &Image{nil, 0.000000}, Connectors: []Connector{Road, Grass, Road, Grass}}
+	want[3] = &Card{Id: 3, Image: &Image{nil, 1.5707963267948966}, Connectors: []Connector{Grass, Road, Grass, Road}}
+	want[4] = &Card{Id: 4, Image: &Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Road, Road}}
+	want[5] = &Card{Id: 5, Image: &Image{nil, 0.000000}, Connectors: []Connector{Road, Road, Grass, Grass}}
+	want[6] = &Card{Id: 6, Image: &Image{nil, 1.5707963267948966}, Connectors: []Connector{Grass, Road, Road, Grass}}
+	want[7] = &Card{Id: 7, Image: &Image{nil, 3.141592653589793}, Connectors: []Connector{Grass, Grass, Road, Road}}
+	want[8] = &Card{Id: 8, Image: &Image{nil, 4.71238898038469}, Connectors: []Connector{Road, Grass, Grass, Road}}
+	want[9] = &Card{Id: 9, Image: &Image{nil, 0.000000}, Connectors: []Connector{Grass, Grass, Grass, Road}}
+	want[10] = &Card{Id: 10, Image: &Image{nil, 1.5707963267948966}, Connectors: []Connector{Road, Grass, Grass, Grass}}
+	want[11] = &Card{Id: 11, Image: &Image{nil, 3.141592653589793}, Connectors: []Connector{Grass, Road, Grass, Grass}}
+	want[12] = &Card{Id: 12, Image: &Image{nil, 4.71238898038469}, Connectors: []Connector{Grass, Grass, Road, Grass}}
 
 	if len(want) != len(got) {
 		t.Errorf("loaded different number of records got %d, want %d", len(got), len(want))
 	}
 
-	for i, card := range got {
+	for i := 1; i <= len(got); i++ {
+		card := got[i]
 		if card.Id != want[i].Id {
 			t.Errorf("interation %d, id wrong got %v, want %v", i, got[i].Id, want[i].Id)
 		}

@@ -18,20 +18,25 @@ type available struct {
 }
 
 // returns a board of buildCells with the initial buildCell
-func getInitialBuildBoard(g *Game) [][]buildCell {
+func getBuildBoard(g *Game) [][]buildCell {
 	board := make([][]buildCell, g.Rules.BoardWidth)
 	for i := range board {
 		board[i] = make([]buildCell, g.Rules.BoardHeight)
 		for j := range board[i] {
-			board[i][j] = initialBuildCell
+			if g.Board[i][j].Card != nil {
+				// if the cell is already placed
+				board[i][j] = buildCell{placed: true, connectors: g.Board[i][j].Card.Connectors}
+			} else {
+				board[i][j] = initialBuildCell
+			}
 		}
 	}
 
-	// add in the seed tiles
-	for _, seedTile := range g.Rules.SeedTiles {
+	// // add in the seed tiles
+	// for _, seedTile := range g.Rules.SeedTiles {
 
-		board[seedTile.X][seedTile.Y] = buildCell{placed: true, connectors: g.Cards[seedTile.Id-1].Connectors}
-	}
+	// 	board[seedTile.X][seedTile.Y] = buildCell{placed: true, connectors: g.Cards[seedTile.Id].Connectors}
+	// }
 
 	return board
 }
@@ -52,7 +57,9 @@ func getEntropyBoard(board [][]buildCell, g *Game) [][][]int {
 
 			if !placed {
 				// compare the built cell to all of the cards
-				for _, card := range g.Cards {
+				// for _, card := range g.Cards {
+				for l := 1; l <= len(g.Cards); l++ {
+					card := g.Cards[l]
 					match := true
 					for k := 0; k < 4; k++ {
 						if (buildCell.connectors[k] & card.Connectors[k]) == 0 {
@@ -131,7 +138,7 @@ func (g *Game) evolveBoard(buildBoard *[][]buildCell) bool {
 	selectedAvaialable := availableCards[g.R.Intn(len(availableCards))]
 
 	// select a random id from the available
-	selectedCardId := selectedAvaialable.ids[g.R.Intn(len(selectedAvaialable.ids))] - 1 // the card ids go from 1 so need to take one off to get the correct card
+	selectedCardId := selectedAvaialable.ids[g.R.Intn(len(selectedAvaialable.ids))]
 	// place the card in the buildBoard
 	(*buildBoard)[selectedAvaialable.x][selectedAvaialable.y] = buildCell{placed: true, connectors: g.Cards[selectedCardId].Connectors}
 
@@ -150,4 +157,19 @@ func debugPrintEntropyBoard(title string, entropyBoard [][][]int) {
 		fmt.Println("")
 	}
 
+}
+func (g Game) DebugPrintBoard() {
+	fmt.Println("** Board **")
+	fmt.Printf("Board width: %d, Board height: %d\n", g.Rules.BoardWidth, g.Rules.BoardHeight)
+	fmt.Println()
+	for _, row := range g.Board {
+		for _, tile := range row {
+			if tile.Card != nil {
+				fmt.Printf("[%02d]", tile.Card.Id)
+			} else {
+				fmt.Printf("[*]")
+			}
+		}
+		println()
+	}
 }

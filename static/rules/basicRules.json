@@ -1,16 +1,16 @@
 {
     "imageSize": 32,
-    "boardWidth": 20,
-    "boardHeight": 10,
+    "boardWidth": 16,
+    "boardHeight": 16,
     "baseCards": [
         {"filename":"static/images/grass.png", "imageLocation":[0,0,32,32], "connectors":"GGGG", "rotations": []},
         {"filename":"static/images/straight.png", "imageLocation":[0,0,32,32], "connectors":"RGRG", "rotations": [90]},
         {"filename":"static/images/cross.png", "imageLocation":[0,0,32,32], "connectors":"RRRR", "rotations": []},
         {"filename":"static/images/corner.png", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270]},
-        {"filename":"static/images/end.png", "imageLocation":[0,0,32,32], "connectors":"GGGR", "rotations": [90, 180, 270]}
+        {"filename":"static/images/end.png", "imageLocation":[0,0,32,32], "connectors":"GGRG", "rotations": [90, 180, 270]}
     ],
     "seedTiles": [
-        {"x": 2, "y": 3, "id":19}
+        {"x": 1, "y": 1, "id":1}
     ]
 
 }

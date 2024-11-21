@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"io/fs"
 	"time"
+
+	"golang.org/x/exp/rand"
 )
 
 type Game struct {
 	Fs    fs.FS
-	Cards []Card
+	Cards map[int]*Card
 	Rules BasicRules
 	Board [][]Tile
 	R     Rnd
@@ -32,43 +34,45 @@ type Rnd interface {
 	Intn(n int) int
 }
 
-// type BasicRandom struct {
-// 	R *rand.Rand
-// }
-
-// func (b BasicRandom) Intn(n int) int {
-// 	return b.R.Intn(n)
-// }
+func NewSeed(seed uint64) *rand.Rand {
+	// create the random number generator and seed it
+	s := rand.NewSource(seed)
+	return rand.New(s)
+}
 
 func NewGame(fs fs.FS, seed uint64) *Game {
 
 	rules := LoadRules("static/rules/basicRules.json", fs)
 	cards := BuildCards(rules, fs)
-
 	tiles := NewBoard(rules, cards)
-	// tiles := make([][]Tile, rules.BoardWidth)
-	// rows := make([]Tile, rules.BoardHeight*rules.BoardWidth)
-	// for i, startRow := 0, 0; i < rules.BoardWidth; i, startRow = i+1, startRow+rules.BoardHeight {
-	// 	endRow := startRow + rules.BoardHeight
-	// 	tiles[i] = rows[startRow:endRow:endRow]
-	// }
 
 	// create the random number generator and seed it
-
-	basicRandom := NewBasicRandom(seed)
+	r := NewSeed(seed)
 
 	g := Game{
 		Fs:    fs,
 		Cards: cards,
 		Rules: rules,
 		Board: tiles,
-		R:     basicRandom,
+		R:     r,
 	}
 	return &g
 }
 
+func (g *Game) NewSeed(seed uint64) {
+	g.R = NewSeed(seed)
+	g.Board = NewBoard(g.Rules, g.Cards)
+	g.CreateLandscape()
+}
+
+func (g *Game) Start() {
+	buildBoard := getBuildBoard(g)
+
+	g.evolveBoard(&buildBoard)
+}
+
 func (g *Game) CreateLandscape() {
-	buildBoard := getInitialBuildBoard(g)
+	buildBoard := getBuildBoard(g)
 
 	cnt := 0
 	startTime := time.Now()
@@ -79,6 +83,7 @@ func (g *Game) CreateLandscape() {
 		}
 	}
 	endTime := time.Now()
+	g.DebugPrintBoard()
 
 	elapsedTime := endTime.Sub(startTime)
 	fmt.Printf("%d evolutions of board in %v\n", cnt, elapsedTime)
