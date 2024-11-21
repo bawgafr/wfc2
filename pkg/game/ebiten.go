@@ -1,13 +1,21 @@
 package game
 
 import (
+	"fmt"
 	"math/rand/v2"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+var oldId = 0
+
 func (g *Game) Draw(screen *ebiten.Image) {
+	if oldId != g.Board[0][0].Card.Id {
+		oldId = g.Board[0][0].Card.Id
+
+	}
 	for _, row := range g.Board {
 		for _, tile := range row {
 
@@ -15,6 +23,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		}
 	}
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("card at 0,0: %d (was %d)", g.Board[0][0].Card.Id, oldId))
 }
 
 func (g *Game) Draw2(screen *ebiten.Image) {
@@ -35,7 +44,7 @@ func (g Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, Scre
 	return 720, 720
 }
 
-func (g Game) Update() error {
+func (g *Game) Update() error {
 
 	next := inpututil.IsKeyJustPressed(ebiten.KeySpace)
 	if next {
