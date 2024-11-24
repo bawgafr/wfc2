@@ -97,7 +97,7 @@ func BuildCards(rules BasicRules, fs fs.FS) map[int]*Card {
 			rotCard := rotateCard(card, rotation, id)
 			cards[rotCard.Id] = &rotCard
 			id++
-			cards[card.Id] = &card
+			// cards[card.Id] = &card
 		}
 	}
 

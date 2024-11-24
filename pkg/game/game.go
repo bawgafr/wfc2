@@ -14,6 +14,7 @@ type Game struct {
 	Rules BasicRules
 	Board [][]Tile
 	R     Rnd
+	Seed  uint64
 }
 
 type SeedTiles struct {
@@ -54,6 +55,7 @@ func NewGame(fs fs.FS, seed uint64) *Game {
 		Cards: cards,
 		Rules: rules,
 		Board: tiles,
+		Seed:  seed,
 		R:     r,
 	}
 	return &g
@@ -62,6 +64,7 @@ func NewGame(fs fs.FS, seed uint64) *Game {
 func (g *Game) NewSeed(seed uint64) {
 	g.R = NewSeed(seed)
 	g.Board = NewBoard(g.Rules, g.Cards)
+	g.Seed = seed
 	g.CreateLandscape()
 }
 

@@ -9,13 +9,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-var oldId = 0
-
 func (g *Game) Draw(screen *ebiten.Image) {
-	if oldId != g.Board[0][0].Card.Id {
-		oldId = g.Board[0][0].Card.Id
 
-	}
 	for _, row := range g.Board {
 		for _, tile := range row {
 
@@ -23,21 +18,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		}
 	}
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("card at 0,0: %d (was %d)", g.Board[0][0].Card.Id, oldId))
-}
-
-func (g *Game) Draw2(screen *ebiten.Image) {
-	for i := 1; i < 13; i++ {
-		card := g.Cards[i]
-		x := 32
-		y := i * 32
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(-16.0, -16.0)
-
-		op.GeoM.Rotate(card.Image.rotateAngle)
-		op.GeoM.Translate(float64(x), float64(y))
-		screen.DrawImage(card.Image.img, op)
-	}
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("Seed: %d", g.Seed))
 }
 
 func (g Game) Layout(outsideWidth int, outsideHeight int) (screenWidth int, ScreenHeight int) {
@@ -54,4 +35,18 @@ func (g *Game) Update() error {
 	}
 
 	return nil
+}
+
+func (g *Game) Draw_debugTiles(screen *ebiten.Image) {
+	for i := 1; i < 13; i++ {
+		card := g.Cards[i]
+		x := 32
+		y := i * 32
+		op := &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(-16.0, -16.0)
+
+		op.GeoM.Rotate(card.Image.rotateAngle)
+		op.GeoM.Translate(float64(x), float64(y))
+		screen.DrawImage(card.Image.img, op)
+	}
 }
