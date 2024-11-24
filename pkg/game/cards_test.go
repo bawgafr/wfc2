@@ -25,7 +25,6 @@ func Test_convertConnections(t *testing.T) {
 
 }
 
-// test with an inital L shape, and rotate it 90, 180, 270 degrees
 func Test_rotateConnection(t *testing.T) {
 	initial := []Connector{Road, Road, Grass, Grass}
 
@@ -65,11 +64,11 @@ func Test_LoadRules(t *testing.T) {
 		BoardWidth:  20,
 		BoardHeight: 10,
 		BaseCards: []BaseCards{
-			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "GGGG", Rotations: []int{}},
-			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RGRG", Rotations: []int{90}},
-			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RRRR", Rotations: []int{}},
-			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RRGG", Rotations: []int{90, 180, 270}},
-			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "GGGR", Rotations: []int{90, 180, 270}},
+			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "GGGG", Rotations: []int{}, Chance: 10},
+			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RGRG", Rotations: []int{90}, Chance: 10},
+			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RRRR", Rotations: []int{}, Chance: 10},
+			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "RRGG", Rotations: []int{90, 180, 270}, Chance: 10},
+			{Filename: "", ImageLocation: []int{0, 0, 32, 32}, Connectors: "GGGR", Rotations: []int{90, 180, 270}, Chance: 10},
 		},
 		SeedTiles: []SeedTiles{
 			{X: 0, Y: 0, Id: 0},
@@ -89,7 +88,7 @@ func Test_LoadRules(t *testing.T) {
 			t.Errorf("Filename not loaded correctly: %s, %s", card.Filename, want.BaseCards[i].Filename)
 		}
 		if !reflect.DeepEqual(card.ImageLocation, want.BaseCards[i].ImageLocation) {
-			t.Errorf("ImageLocation not loaded correctly: %v, %v", card.ImageLocation, want.BaseCards[i].ImageLocation)
+			t.Errorf("ImageLocation not loaded correctly: '%v', '%v'", card.ImageLocation, want.BaseCards[i].ImageLocation)
 		}
 		if card.Connectors != want.BaseCards[i].Connectors {
 			t.Errorf("Connectors not loaded correctly: %s, %s", card.Connectors, want.BaseCards[i].Connectors)
@@ -156,10 +155,6 @@ func Test_BuildCards(t *testing.T) {
 				wantCon[0], wantCon[1], wantCon[2], wantCon[3])
 		}
 	}
-
-	// if !reflect.DeepEqual(want, got) {
-	// 	t.Errorf("got %v, want %v", got, want)
-	// }
 }
 
 ///////////////////////////// Helper functions /////////////////////////////////
@@ -173,11 +168,11 @@ func getFS() fs.FS {
 					"boardWidth": 20,
 					"boardHeight": 10,
 					"baseCards": [
-						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"GGGG", "rotations": []},
-						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RGRG", "rotations": [90]},
-						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RRRR", "rotations": []},
-						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270]},
-						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"GGGR", "rotations": [90, 180, 270]}
+						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"GGGG", "rotations": [], "chance": 10},
+						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RGRG", "rotations": [90], "chance": 10},
+						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RRRR", "rotations": [], "chance": 10},
+						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270], "chance": 10},
+						{"filename":"", "imageLocation":[0,0,32,32], "connectors":"GGGR", "rotations": [90, 180, 270], "chance": 10}
 					],
 					"seedTiles": [
 						{"x": 0, "y": 0, "id":0}

@@ -54,6 +54,7 @@ type Card struct {
 	Id         int
 	Image      *Image
 	Connectors []Connector
+	chance     int
 }
 
 func (c Card) String() string {
@@ -66,6 +67,7 @@ type BaseCards struct {
 	ImageLocation []int
 	Connectors    string
 	Rotations     []int
+	Chance        int
 }
 
 func BuildCards(rules BasicRules, fs fs.FS) map[int]*Card {
@@ -90,6 +92,7 @@ func BuildCards(rules BasicRules, fs fs.FS) map[int]*Card {
 			Id:         id,
 			Image:      &image,
 			Connectors: convertConnections(baseCard.Connectors),
+			chance:     baseCard.Chance,
 		}
 		cards[card.Id] = &card
 		id++
@@ -97,7 +100,6 @@ func BuildCards(rules BasicRules, fs fs.FS) map[int]*Card {
 			rotCard := rotateCard(card, rotation, id)
 			cards[rotCard.Id] = &rotCard
 			id++
-			// cards[card.Id] = &card
 		}
 	}
 
@@ -149,6 +151,7 @@ func rotateCard(card Card, rotation, id int) Card {
 		Id:         id,
 		Image:      rotImage,
 		Connectors: rotateConnections(card.Connectors, rotation),
+		chance:     card.chance,
 	}
 	return rotCard
 }

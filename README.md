@@ -45,4 +45,7 @@ Build loop: {
 
 How do we know its finished...
 
-	
+=======
+make randomness of different types of tiles non-uniform
+give each tile a chance with a base of 10 (for grass), and an integer value 1-9 for other pieces.
+when we have to choose a tile to place, sum all of the chances, and get a random number from that, then work out which (starting with lowest id 1->chance, then next lowest id)	
