@@ -3,7 +3,6 @@ module wfc2
 go 1.23.2
 
 require (
-	github.com/bawgafr/prettyprintradians v0.1.0
 	github.com/hajimehoshi/ebiten/v2 v2.8.4
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 )

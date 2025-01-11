@@ -73,6 +73,7 @@ func Test_LoadRules(t *testing.T) {
 		SeedTiles: []SeedTiles{
 			{X: 0, Y: 0, Id: 0},
 		},
+		Randomiser: Basic,
 	}
 
 	if got.ImageSize != want.ImageSize || got.BoardWidth != want.BoardWidth || got.BoardHeight != want.BoardHeight {
@@ -176,7 +177,8 @@ func getFS() fs.FS {
 					],
 					"seedTiles": [
 						{"x": 0, "y": 0, "id":0}
-					]
+					],
+					"randomiser": 0
 				}`)},
 	}
 

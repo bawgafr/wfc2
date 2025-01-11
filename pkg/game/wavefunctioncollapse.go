@@ -17,7 +17,6 @@ type available struct {
 	ids []int
 }
 
-// returns a board of buildCells with the initial buildCell
 func getBuildBoard(g *Game) [][]buildCell {
 	board := make([][]buildCell, g.Rules.BoardWidth)
 	for i := range board {
@@ -31,12 +30,6 @@ func getBuildBoard(g *Game) [][]buildCell {
 			}
 		}
 	}
-
-	// // add in the seed tiles
-	// for _, seedTile := range g.Rules.SeedTiles {
-
-	// 	board[seedTile.X][seedTile.Y] = buildCell{placed: true, connectors: g.Cards[seedTile.Id].Connectors}
-	// }
 
 	return board
 }
@@ -57,7 +50,6 @@ func getEntropyBoard(board [][]buildCell, g *Game) [][][]int {
 
 			if !placed {
 				// compare the built cell to all of the cards
-				// for _, card := range g.Cards {
 				for l := 1; l <= len(g.Cards); l++ {
 					card := g.Cards[l]
 					match := true
@@ -103,6 +95,7 @@ func getEntropicCard(board [][]buildCell, i, j int) []Connector {
 
 }
 
+// return a list of the locations that have the fewest possible cards
 func countEntropyBoard(entropyBoard [][][]int) []available {
 	smallestPossible := 100000
 	availableCells := []available{}
@@ -125,20 +118,28 @@ func (g *Game) evolveBoard(buildBoard *[][]buildCell) bool {
 	// the whole loop
 
 	entropyBoard := getEntropyBoard(*buildBoard, g)
-	availableCards := countEntropyBoard(entropyBoard)
 
-	// debugPrintEntropyBoard("entropy board", entropyBoard)
-	// fmt.Println("available cards", availableCards)
+	// get a list of the lowest entropy
+	availableCards := countEntropyBoard(entropyBoard)
 
 	if len(availableCards) == 0 {
 		return false
 	}
 
-	// select a random available
+	// randomisation functionality
+
+	// select a random location to play a card -- from the list of locations with the fewest range of cards
 	selectedAvaialable := availableCards[g.R.Intn(len(availableCards))]
 
 	// select a random id from the available
-	selectedCardId := selectedAvaialable.ids[g.R.Intn(len(selectedAvaialable.ids))]
+	var selectedCardId int
+	switch g.Rules.Randomiser {
+	case Basic:
+		selectedCardId = selectedAvaialable.ids[g.R.Intn(len(selectedAvaialable.ids))]
+	case SimpleWeighted:
+		selectedCardId = basicWeightedRandom(g, selectedAvaialable.ids)
+	}
+
 	// place the card in the buildBoard
 	(*buildBoard)[selectedAvaialable.x][selectedAvaialable.y] = buildCell{placed: true, connectors: g.Cards[selectedCardId].Connectors}
 
@@ -146,6 +147,29 @@ func (g *Game) evolveBoard(buildBoard *[][]buildCell) bool {
 	g.Board[selectedAvaialable.x][selectedAvaialable.y] = Tile{Card: g.Cards[selectedCardId], X: selectedAvaialable.x, Y: selectedAvaialable.y}
 
 	return true
+}
+
+func basicWeightedRandom(g *Game, ids []int) int {
+	// get the total weight of the cards
+	totalWeight := 0
+	for _, id := range ids {
+		totalWeight += g.Cards[id].chance
+	}
+
+	// get a random number between 0 and the total weight
+	r := g.R.Intn(totalWeight)
+
+	// loop through the ids and subtract the weight from the random number until it is less than 0
+	// then return that id
+	for _, id := range ids {
+		r -= g.Cards[id].chance
+		if r < 0 {
+			return id
+		}
+	}
+
+	// must be the first one then...
+	return ids[0]
 }
 
 func debugPrintEntropyBoard(title string, entropyBoard [][][]int) {

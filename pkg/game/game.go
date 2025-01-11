@@ -17,6 +17,13 @@ type Game struct {
 	Seed  uint64
 }
 
+type Randomiser int
+
+const (
+	Basic          Randomiser = iota // ignore the chance field -- the initial version
+	SimpleWeighted                   // use the chance field to determine the weight of the card
+)
+
 type SeedTiles struct {
 	X  int
 	Y  int
@@ -29,6 +36,7 @@ type BasicRules struct {
 	BoardHeight int
 	BaseCards   []BaseCards
 	SeedTiles   []SeedTiles
+	Randomiser  Randomiser
 }
 
 type Rnd interface {

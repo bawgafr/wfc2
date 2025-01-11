@@ -3,14 +3,15 @@
     "boardWidth": 16,
     "boardHeight": 16,
     "baseCards": [
-        {"filename":"static/images/grass.png", "imageLocation":[0,0,32,32], "connectors":"GGGG", "rotations": [], "chance":10},
-        {"filename":"static/images/straight.png", "imageLocation":[0,0,32,32], "connectors":"RGRG", "rotations": [90], "chance":9},
-        {"filename":"static/images/cross.png", "imageLocation":[0,0,32,32], "connectors":"RRRR", "rotations": [], "chance": 4},
-        {"filename":"static/images/corner.png", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270], "chance": 6},
-        {"filename":"static/images/end.png", "imageLocation":[0,0,32,32], "connectors":"GGRG", "rotations": [90, 180, 270], "chance": 4}
+        {"filename":"static/images/grass.png", "imageLocation":[0,0,32,32], "connectors":"GGGG", "rotations": [], "chance":300},
+        {"filename":"static/images/straight.png", "imageLocation":[0,0,32,32], "connectors":"RGRG", "rotations": [90], "chance":120},
+        {"filename":"static/images/cross.png", "imageLocation":[0,0,32,32], "connectors":"RRRR", "rotations": [], "chance": 2},
+        {"filename":"static/images/corner.png", "imageLocation":[0,0,32,32], "connectors":"RRGG", "rotations": [90, 180, 270], "chance": 64},
+        {"filename":"static/images/end.png", "imageLocation":[0,0,32,32], "connectors":"GGRG", "rotations": [90, 180, 270], "chance": 2}
     ],
     "seedTiles": [
         {"x": 1, "y": 1, "id":1}
-    ]
+    ],
+    "Randomiser" : 1
 
 }
